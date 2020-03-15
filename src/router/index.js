@@ -4,7 +4,7 @@ const Home = () => import('@/views/home') // 主页组件
 const Layout = () => import('@/views/layout') // 引入布局组件
 const Question = () => import('@/views/question') // 问答组件
 const Video = () => import('@/views/video') // 视频组件
-const User = () => import('@/views/video') // 个人中心组件
+const User = () => import('@/views/user') // 个人中心组件
 const Profile = () => import('@/views/user/profile')// 编辑资料组件
 const Chat = () => import('@/views/user/chat') // 小智同学
 const Login = () => import('@/views/login') // 登录组件
