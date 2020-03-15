@@ -3,7 +3,7 @@
   <div class="container">
     <!-- 顶部导航栏 -->
     <!-- fixed 是否固定在顶部 默认值是false -->
-    <van-nav-bar v-if="showNavBar" fixed title="黑马头条" right-text="搜索"></van-nav-bar>
+    <van-nav-bar v-if="showNavBar" fixed title="黑马头条" right-text="搜索" @click-right="$router.push('/search')"></van-nav-bar>
       <!-- :class="{ 名称: 布尔值 } -->
     <div class="my-wrapper" :class="{noTop:!showNavBar}">
       <router-view></router-view>

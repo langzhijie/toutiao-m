@@ -1,14 +1,20 @@
 <template>
-<!-- 视频模块 -->
-  <div>视频模块</div>
+  <!-- 视频模块 -->
+  <div>
+    <div class="split"></div>
+    <van-skeleton title :row="3" />
+    <div class="split"></div>
+    <van-skeleton title :row="3" />
+    <div class="split"></div>
+    <van-skeleton title :row="3" />
+    <div class="split"></div>
+    <van-skeleton title :row="3" />
+  </div>
 </template>
 
 <script>
-export default {
-
-}
+export default {}
 </script>
 
 <style>
-
 </style>
