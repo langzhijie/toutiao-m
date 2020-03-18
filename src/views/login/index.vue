@@ -100,7 +100,7 @@ export default {
           this.$router.push(redirectUrl || '/') // 有值就跳哪里 没值就跳/
         } catch (error) {
           // 告诉用户登录失败
-          this.$notify({ message: '用户名或者验证码错误', duration: 5000 })
+          this.$lnotify({ message: '用户名或者验证码错误' })
         }
       }
     }
