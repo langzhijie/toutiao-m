@@ -3,13 +3,9 @@
    <!-- 标签页组件 -->
    <van-tabs>
      <!-- 子标签 -->
-       <van-tab title="标签1" v-for="item in 5" :key="item">
-         <!-- 放置一个div设置滚动条 -->
-         <div class="scroll-wrapper">
-           <van-cell-group>
-           <van-cell title="标题" value="内容" v-for="item in 20" :key="item"></van-cell>
-         </van-cell-group>
-         </div>
+       <van-tab :title="item.name" v-for="item in channels" :key="item.id">
+         <!-- 放置封装的组件 -->
+        <ArticleList></ArticleList>
        </van-tab>
        <!-- 放置展开图标用来编辑频道 -->
       <span class="bar_btn">
@@ -20,7 +16,29 @@
 </template>
 
 <script>
+import ArticleList from './components/article.list'
+import { getMyChannels } from '@/api/channels'
+
 export default {
+  components: {
+    // 局部注册组件
+    ArticleList
+  },
+  data () {
+    return {
+      channels: [] // 文章的频道
+    }
+  },
+  methods: {
+    // 获取文章频道的方法
+    async getMyChannels () {
+      const data = await getMyChannels() // 接收返回的结果
+      this.channels = data.channels // 赋值给文章频道数组
+    }
+  },
+  created () {
+    this.getMyChannels()
+  }
 
 }
 </script>
