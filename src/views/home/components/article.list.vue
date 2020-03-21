@@ -51,8 +51,8 @@
                 <span>{{item.pubdate|relTime}}</span>
                 <!-- 这个X号显示需要判断登录状态 登录就显示 -->
                 <!-- <span class="close" v-if="$store.state.user.token"> -->
-                  <!--  @click="逻辑处理 点击事件名"-->
-                  <span @click="$emit('showAction')"  class="close" v-if="user.token" >
+                  <!--  @click="逻辑处理 点击事件名" 还需要传出点击的文章id做不感兴趣等操作-->
+                  <span @click="$emit('showAction',item.art_id.toString())"  class="close" v-if="user.token" >
                   <van-icon name="cross"></van-icon>
                 </span>
               </div>
@@ -68,7 +68,29 @@
 <script>
 import { getArticles } from '@/api/articles' // 引入获取文章请求方法
 import { mapState } from 'vuex' // vuex辅助函数
+import eventbus from '@/utils/eventbus'
 export default {
+  created () {
+    // 初始化函数
+    // 监听eventbus广播的事件
+    // 每个组件都在监听$on的事件
+    // arteID文章的id  channelId激活页签的id
+    eventbus.$on('delArtcile', (artID, channelId) => {
+      // 判断 传来的频道等于自身的频道 如果等于就可以进行删除
+      if (channelId === this.channel_id) {
+        const index = this.articles.findIndex(item => item.art_id.toString() === artID)
+        if (index > -1) {
+          // 删除对应下标的数据
+          this.articles.splice(index, 1)
+        }
+        // 如果删除数据删光了 就不会触发load事件
+        // 列表长度为0 就掉加载数据
+        if (this.articles.length === 0) {
+          this.onload()
+        }
+      }
+    })
+  },
   computed: {
     ...mapState(['user']) // 将user对象映射到计算属性中
   },
@@ -89,6 +111,7 @@ export default {
       articles: [], // 文章列表
       downloading: false, // 下拉刷新是否开启 开启布尔值就是false
       timestamp: null // 用来存储历史事件戳
+
     }
   },
   methods: {

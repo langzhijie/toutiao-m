@@ -6,9 +6,17 @@ import request from '@/utils/request'
 // 还需传入 timestamp 时间戳 和 channel_id频道id
 export function getArticles (params) {
   return request({
-    url: 'http://ttapi.research.itcast.cn/app/v1_1/articles', // 请求地址
+    url: 'http://ttapi.research.itcast.cn/app/v1_1/articles', // 请求地址文章地址
     // 将固定的置顶设置 和传入的参数合并
     params: { with_top: 1, ...params } // 置顶数据
 
+  })
+}
+// 不感兴趣文章请求
+export function disLikeArticle (data) {
+  return request({
+    url: '/article/dislikes', // 不喜欢文章的接口地址
+    method: 'POST',
+    data
   })
 }

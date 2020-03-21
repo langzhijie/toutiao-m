@@ -1,7 +1,8 @@
 <template>
  <div class="container">
    <!-- 标签页组件 -->
-   <van-tabs>
+   <!-- v-model绑定默认的激活页签 -->
+   <van-tabs v-model="activeIndex">
      <!-- 子标签 -->
        <van-tab :title="item.name" v-for="item in channels" :key="item.id">
          <!-- 放置封装的组件 -->
@@ -16,7 +17,8 @@
       <!-- 点击X号显示的弹层组件 -->
 
       <van-popup :style="{ width: '80%' }" v-model="showMoreAction">
-      <MoreAction ></MoreAction>
+        <!-- 监听子组件的自定义事件 -->
+      <MoreAction @dislike="dislikeAction"></MoreAction>
     </van-popup>
  </div>
 </template>
@@ -25,7 +27,8 @@
 import ArticleList from './components/article.list' // 子组件
 import MoreAction from './components/more-action' // 弹层组件
 import { getMyChannels } from '@/api/channels'// 请求文章频道
-
+import { disLikeArticle } from '@/api/articles' // 不感兴趣的请求
+import eventbus from '@/utils/eventbus' // 公共事件广播
 export default {
   components: {
     // 局部注册组件
@@ -35,7 +38,9 @@ export default {
   data () {
     return {
       channels: [], // 文章的频道
-      showMoreAction: false // 控制弹层显示隐藏的变量 false不显示
+      showMoreAction: false, // 控制弹层显示隐藏的变量 false不显示
+      articleID: null, // 存储子组件传入的文章id
+      activeIndex: '0'// 默认激活的页签为0
     }
   },
   methods: {
@@ -46,9 +51,33 @@ export default {
       this.channels = data.channels // 赋值给文章频道数组
     },
     // 控制弹层显示的方法
-    openAction () {
+    // airid 子组件传入的文章id
+    openAction (airId) {
       // 设置弹层显示
       this.showMoreAction = true
+      // 接收的文章id存入data变量
+      this.articleID = airId
+    },
+    // 子组件moreAciton子组件自定义的不感兴趣的方法
+    async dislikeAction () {
+      try {
+        await disLikeArticle({
+          target: this.articleID // 传入不感兴趣的文章ID
+        })
+        this.$lnotify({
+          type: 'success',
+          message: '操作成功'
+        })
+        this.showMoreAction = false // 操作成功关闭弹窗
+        // 广播事件 传入要删除的文章id
+        // 参出文章id 和当前页签下标
+        // this.channels[this.activeIndex].id 这个就是页签下标的对应的名
+        eventbus.$emit('delArtcile', this.articleID, this.channels[this.activeIndex].id)
+      } catch (error) {
+        this.$lnotify({
+          message: '操作失败'
+        })
+      }
     }
 
   },
