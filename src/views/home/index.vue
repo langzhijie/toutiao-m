@@ -5,37 +5,52 @@
      <!-- 子标签 -->
        <van-tab :title="item.name" v-for="item in channels" :key="item.id">
          <!-- 放置封装的组件 -->
-        <ArticleList :channel_id="item.id"></ArticleList>
+          <!--@showAction 监听子组件触发的点击事件 -->
+        <ArticleList :channel_id="item.id"  @showAction="openAction"></ArticleList>
        </van-tab>
-       <!-- 放置展开图标用来编辑频道 -->
+   </van-tabs>
+    <!-- 放置展开图标用来编辑频道 -->
       <span class="bar_btn">
          <van-icon name="wap-nav"></van-icon>
       </span>
-   </van-tabs>
+      <!-- 点击X号显示的弹层组件 -->
+
+      <van-popup :style="{ width: '80%' }" v-model="showMoreAction">
+      <MoreAction ></MoreAction>
+    </van-popup>
  </div>
 </template>
 
 <script>
 import ArticleList from './components/article.list' // 子组件
-// import MoreAction from './components/more-action' // 弹层组件
+import MoreAction from './components/more-action' // 弹层组件
 import { getMyChannels } from '@/api/channels'// 请求文章频道
 
 export default {
   components: {
     // 局部注册组件
-    ArticleList
+    ArticleList,
+    MoreAction // 弹层组件
   },
   data () {
     return {
-      channels: [] // 文章的频道
+      channels: [], // 文章的频道
+      showMoreAction: false // 控制弹层显示隐藏的变量 false不显示
     }
   },
   methods: {
+
     // 获取文章频道的方法
     async getMyChannels () {
       const data = await getMyChannels() // 接收返回的结果
       this.channels = data.channels // 赋值给文章频道数组
+    },
+    // 控制弹层显示的方法
+    openAction () {
+      // 设置弹层显示
+      this.showMoreAction = true
     }
+
   },
   created () {
     this.getMyChannels()

@@ -51,7 +51,8 @@
                 <span>{{item.pubdate|relTime}}</span>
                 <!-- 这个X号显示需要判断登录状态 登录就显示 -->
                 <!-- <span class="close" v-if="$store.state.user.token"> -->
-                  <span class="close" v-if="user.token">
+                  <!--  @click="逻辑处理 点击事件名"-->
+                  <span @click="$emit('showAction')"  class="close" v-if="user.token" >
                   <van-icon name="cross"></van-icon>
                 </span>
               </div>
