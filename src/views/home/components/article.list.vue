@@ -75,7 +75,7 @@ export default {
     // 监听eventbus广播的事件
     // 每个组件都在监听$on的事件
     // arteID文章的id  channelId激活页签的id
-    eventbus.$on('delArtcile', (artID, channelId) => {
+    eventbus.$on('delArticle', (artID, channelId) => {
       // 判断 传来的频道等于自身的频道 如果等于就可以进行删除
       if (channelId === this.channel_id) {
         const index = this.articles.findIndex(item => item.art_id.toString() === artID)

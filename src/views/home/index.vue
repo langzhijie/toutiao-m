@@ -18,7 +18,10 @@
 
       <van-popup :style="{ width: '80%' }" v-model="showMoreAction">
         <!-- 监听子组件的自定义事件 -->
-      <MoreAction @dislike="dislikeAction"></MoreAction>
+        <!-- 子组件传的事件  不敢兴趣dislike 举报reports-->
+        <!-- @事件名="方法名($event 参数)" -->
+        <!-- $event 是事件参数 在H5标签中dom元素的事件参数 自定义事件中$event就是自定义事件传出的第一个参数 -->
+      <MoreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('report',$event)" />
     </van-popup>
  </div>
 </template>
@@ -27,7 +30,8 @@
 import ArticleList from './components/article.list' // 子组件
 import MoreAction from './components/more-action' // 弹层组件
 import { getMyChannels } from '@/api/channels'// 请求文章频道
-import { disLikeArticle } from '@/api/articles' // 不感兴趣的请求
+import { disLikeArticle, reportArticle } from '@/api/articles' // 不感兴趣的请求方法和举报
+
 import eventbus from '@/utils/eventbus' // 公共事件广播
 export default {
   components: {
@@ -59,11 +63,12 @@ export default {
       this.articleID = airId
     },
     // 子组件moreAciton子组件自定义的不感兴趣的方法
-    async dislikeAction () {
+    // operateType就是操作类型 dislike就是不感兴趣 reports就是举报
+    async dislikeOrReport (operateType, type) {
       try {
-        await disLikeArticle({
+        operateType === 'dislike' ? await disLikeArticle({
           target: this.articleID // 传入不感兴趣的文章ID
-        })
+        }) : await reportArticle({ target: this.articleID, type })
         this.$lnotify({
           type: 'success',
           message: '操作成功'
@@ -72,17 +77,36 @@ export default {
         // 广播事件 传入要删除的文章id
         // 参出文章id 和当前页签下标
         // this.channels[this.activeIndex].id 这个就是页签下标的对应的名
-        eventbus.$emit('delArtcile', this.articleID, this.channels[this.activeIndex].id)
+        eventbus.$emit('delArticle', this.articleID, this.channels[this.activeIndex].id)
       } catch (error) {
         this.$lnotify({
           message: '操作失败'
         })
       }
     }
+    // 举报文章
+    // type就是子组件传过来的item.value
+    // async reportsAction (type) {
+    //   try {
+    //     // 成功的话
+    //     await reportArticle({ target: this.articleID, type })
+    //     this.$lnotify({
+    //       type: 'success',
+    //       message: '操作成功'
+    //     })
+    //     this.showMoreAction = false // 操作成功关闭弹窗
+    //     // 同样监听eventbus.$on 删除对应频道的举报的文章
+    //     eventbus.$emit('delArtcile', this.articleID, this.channels[this.activeIndex].id)
+    //   } catch (error) {
+    //     this.$lnotify({
+    //       message: '操作失败'
+    //     })
+    //   }
+    // }
 
   },
   created () {
-    this.getMyChannels()
+    this.getMyChannels()// 调用获取文章的方法
   }
 
 }

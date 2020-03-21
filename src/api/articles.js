@@ -20,3 +20,13 @@ export function disLikeArticle (data) {
     data
   })
 }
+
+// 举报文章的请求
+
+export function reportArticle (data) {
+  return request({
+    url: '/article/reports', // 举报文章的请求地址
+    method: 'POST',
+    data
+  })
+}
