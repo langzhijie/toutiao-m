@@ -5,7 +5,7 @@
      <!-- 子标签 -->
        <van-tab :title="item.name" v-for="item in channels" :key="item.id">
          <!-- 放置封装的组件 -->
-        <ArticleList></ArticleList>
+        <ArticleList :channel_id="item.id"></ArticleList>
        </van-tab>
        <!-- 放置展开图标用来编辑频道 -->
       <span class="bar_btn">
