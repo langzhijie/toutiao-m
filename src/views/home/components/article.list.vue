@@ -34,21 +34,24 @@
               <!-- 文章封面 -->
               <!-- 三图 -->
               <div class="img_box" v-if="item.cover.type===3">
-                <van-image class="w33" fit="cover" :src="item.cover.images[0]" />
-                <van-image class="w33" fit="cover" :src="item.cover.images[1]" />
-                <van-image class="w33" fit="cover" :src="item.cover.images[2]" />
+                <!-- lazy-load 表示图片懒加载处理 -->
+                <van-image lazy-load  class="w33" fit="cover" :src="item.cover.images[0]" />
+                <van-image lazy-load  class="w33" fit="cover" :src="item.cover.images[1]" />
+                <van-image lazy-load  class="w33" fit="cover" :src="item.cover.images[2]" />
               </div>
               <!-- 单图 -->
               <div class="img_box" v-if="item.cover.type===1">
 
-                <van-image class="w33" fit="cover" :src="item.cover.images[0]" />
+                <van-image lazy-load  class="w33" fit="cover" :src="item.cover.images[0]" />
               </div>
               <!-- 作者信息 -->
               <div class="info_box">
                 <span>{{item.aut_name}}</span>
                 <span>{{item.comm_count}}</span>
-                <span>{{item.pubdate}}</span>
-                <span class="close">
+                <span>{{item.pubdate|relTime}}</span>
+                <!-- 这个X号显示需要判断登录状态 登录就显示 -->
+                <!-- <span class="close" v-if="$store.state.user.token"> -->
+                  <span class="close" v-if="user.token">
                   <van-icon name="cross"></van-icon>
                 </span>
               </div>
@@ -63,8 +66,11 @@
 
 <script>
 import { getArticles } from '@/api/articles' // 引入获取文章请求方法
-
+import { mapState } from 'vuex' // vuex辅助函数
 export default {
+  computed: {
+    ...mapState(['user']) // 将user对象映射到计算属性中
+  },
   // 父组件传过来的数据  对象形式的接收数据
   props: {
     // key就是props的属性名  value就是对象
@@ -100,7 +106,7 @@ export default {
       //   this.uploading = false
       //   console.log(this.articles.length)
       // }
-
+      await this.$sleep(1000) // 人为的控制请求时间
       // 开始加载文章列表加载数据
       const res = await getArticles({
         channel_id: this.channel_id, // 参数channel_id  当前的文章频道id
@@ -134,6 +140,7 @@ export default {
       //   this.downloading = false
       //   this.successText = `更新${arr.length}了条数据`
       // }, 1000)
+      await this.$sleep(1000) // 人为的控制请求时间
       const data = await getArticles({
         // 下拉刷新发送最新的时间戳
         channel_id: this.channel_id,

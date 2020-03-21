@@ -16,8 +16,9 @@
 </template>
 
 <script>
-import ArticleList from './components/article.list'
-import { getMyChannels } from '@/api/channels'
+import ArticleList from './components/article.list' // 子组件
+// import MoreAction from './components/more-action' // 弹层组件
+import { getMyChannels } from '@/api/channels'// 请求文章频道
 
 export default {
   components: {
