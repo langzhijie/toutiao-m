@@ -11,11 +11,10 @@
        </van-tab>
    </van-tabs>
     <!-- 放置展开图标用来编辑频道 -->
-      <span class="bar_btn">
+      <span class="bar_btn" @click="showChannelEdit=true">
          <van-icon name="wap-nav"></van-icon>
       </span>
       <!-- 点击X号显示的弹层组件 -->
-
       <van-popup :style="{ width: '80%' }" v-model="showMoreAction">
         <!-- 监听子组件的自定义事件 -->
         <!-- 子组件传的事件  不敢兴趣dislike 举报reports-->
@@ -23,12 +22,20 @@
         <!-- $event 是事件参数 在H5标签中dom元素的事件参数 自定义事件中$event就是自定义事件传出的第一个参数 -->
       <MoreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('report',$event)" />
     </van-popup>
+
+    <!-- 频道管理的组件 -->
+    <!-- 通过绑定控制显示与隐藏  round控制菜单是否为圆角   -->
+    <van-action-sheet v-model="showChannelEdit" :round="false" title="频道管理">
+      <!-- 将父组件的频道列表传入子组件渲染 -->
+      <Channeledit :channels="channels"></Channeledit>
+    </van-action-sheet>
  </div>
 </template>
 
 <script>
-import ArticleList from './components/article.list' // 子组件
+import ArticleList from './components/article.list' // 文章列表子组件
 import MoreAction from './components/more-action' // 弹层组件
+import Channeledit from './components/channel-edit' // 频道管理的子组件
 import { getMyChannels } from '@/api/channels'// 请求文章频道
 import { disLikeArticle, reportArticle } from '@/api/articles' // 不感兴趣的请求方法和举报
 
@@ -37,14 +44,17 @@ export default {
   components: {
     // 局部注册组件
     ArticleList,
-    MoreAction // 弹层组件
+    MoreAction, // 弹层组件
+    Channeledit // 频道管理组件
   },
   data () {
     return {
       channels: [], // 文章的频道
       showMoreAction: false, // 控制弹层显示隐藏的变量 false不显示
       articleID: null, // 存储子组件传入的文章id
-      activeIndex: '0'// 默认激活的页签为0
+      activeIndex: '0', // 默认激活的页签为0
+      showChannelEdit: false // 显示与隐藏频道管理 false为隐藏
+
     }
   },
   methods: {
@@ -113,6 +123,19 @@ export default {
 </script>
 
 <style lang="less" scoped>
+// 这是频道管理弹出面板的样式
+.van-action-sheet {
+  max-height: 100%;
+  height: 100%;
+  .van-action-sheet__header {
+    background: #3296fa;
+    color: #fff;
+    .van-icon-close {
+      color: #fff;
+    }
+  }
+}
+
 .van-tabs {
   height: 100%;
   display: flex;

@@ -8,3 +8,9 @@ export function getMyChannels () {
 
   })
 }
+// 获取全部的文章频道
+export function getAllChannels () {
+  return request({
+    url: '/channels' // 请求全部文章频道的方法
+  })
+}
