@@ -10,9 +10,21 @@
         <van-button v-else @click="editing=false" size="mini" type="danger" plain>完成</van-button>
       </div>
       <van-grid class="van-hairline--left">
-        <van-grid-item v-for="item in channels" :key="item.id">
-          <span class="f12">{{item.name}}</span>
-          <van-icon class="btn" name="cross"></van-icon>
+        <van-grid-item v-for="(item,index) in channels" :key="item.id">
+          <!-- 自定义事件selectChannels 将索引值传入父组件 -->
+          <!-- 给激活的频道添加样式 -->
+          <span
+            :class="{red:index===activeIndex}"
+            class="f12"
+            @click="$emit('selectChannels',index)"
+          >{{item.name}}</span>
+          <!-- 传出当前要删除的id -->
+          <van-icon
+            @click="$emit('delChannel', item.id)"
+            v-if="index!==0 && editing"
+            class="btn"
+            name="cross"
+          ></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
@@ -45,7 +57,6 @@ export default {
       const data = await getAllChannels()
       this.allChannels = data.channels // 将请求回来的全部频道赋值给data中定义的变量
     }
-
   },
   computed: {
     // 计算属性中必须要有返回值 用全部文章列表的数组-我的文章频道得到可选的文章频道
@@ -60,10 +71,17 @@ export default {
     this.getAllChannels() // 调用获取全部频道的方法
   },
   props: {
+    //   接收父组件传的我的频道
     channels: {
       required: true, // 必传项
       type: Array // 传的类型数组
       //   default: () => [] // 默认值是空数组 可以不写
+    },
+    // 接收父组件传来的下标进行样式的添加
+    activeIndex: {
+      required: true, // 必传项
+      type: Number,
+      default: 0
     }
   }
 }

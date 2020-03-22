@@ -27,7 +27,10 @@
     <!-- 通过绑定控制显示与隐藏  round控制菜单是否为圆角   -->
     <van-action-sheet v-model="showChannelEdit" :round="false" title="频道管理">
       <!-- 将父组件的频道列表传入子组件渲染 -->
-      <Channeledit :channels="channels"></Channeledit>
+      <!-- 监听子组件的自定义事件  selectChannels-->
+      <!-- 将激活的索引传到子组件进行添加样式 activeIndex-->
+      <!-- 删除频道delChannels -->
+      <Channeledit :activeIndex="activeIndex" :channels="channels" @selectChannels="selectChannels" @delChannel="delChannel"></Channeledit>
     </van-action-sheet>
  </div>
 </template>
@@ -36,7 +39,7 @@
 import ArticleList from './components/article.list' // 文章列表子组件
 import MoreAction from './components/more-action' // 弹层组件
 import Channeledit from './components/channel-edit' // 频道管理的子组件
-import { getMyChannels } from '@/api/channels'// 请求文章频道
+import { getMyChannels, delChannel } from '@/api/channels'// 请求文章频道
 import { disLikeArticle, reportArticle } from '@/api/articles' // 不感兴趣的请求方法和举报
 
 import eventbus from '@/utils/eventbus' // 公共事件广播
@@ -52,18 +55,44 @@ export default {
       channels: [], // 文章的频道
       showMoreAction: false, // 控制弹层显示隐藏的变量 false不显示
       articleID: null, // 存储子组件传入的文章id
-      activeIndex: '0', // 默认激活的页签为0
+      activeIndex: 0, // 默认激活的页签为0
       showChannelEdit: false // 显示与隐藏频道管理 false为隐藏
 
     }
   },
   methods: {
+    // 删除频道的方法 参数id要删除的id
+    // 删除频道的方法
+    async delChannel (id) {
+      // 此时应该先调用api
+      try {
+        await delChannel(id) // 调用api方法  此时只是删除了 缓存中的数据
+        // 如果此时成功的resolve了 我们 应该去移除 当前data中的数据
+        const index = this.channels.findIndex(item => item.id === id) // 找到对应的索引
+        // 找到对应的索引之后
+        // 要根据当前删除的索引 和 当前激活的索引的 关系 来 决定 当前激活索引是否需要改变
+        if (index <= this.activeIndex) {
+          //  如果你删除的索引 是在当前激活索引之前的 或者等于当前激活索引的
+          // 此时就要把激活索引 给往前挪一位
+          this.activeIndex = this.activeIndex - 1
+        }
+        this.channels.splice(index, 1) // 删除对应的索引频道
+      } catch (error) {
+        this.$lnotify({ message: '删除频道失败' })
+      }
+    },
 
     // 获取文章频道的方法
     async getMyChannels () {
       const data = await getMyChannels() // 接收返回的结果
       this.channels = data.channels // 赋值给文章频道数组
     },
+    // 我的频道的点击跳转到选择的频道
+    selectChannels (index) {
+      this.activeIndex = index // 赋值给默认激活页签
+      this.showChannelEdit = false // 选择后关闭频道管理菜单
+    },
+
     // 控制弹层显示的方法
     // airid 子组件传入的文章id
     openAction (airId) {
