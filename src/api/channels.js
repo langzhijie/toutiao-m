@@ -71,3 +71,15 @@ export function delChannel (id) {
     }
   })
 }
+
+// 添加频道
+// 参数 channel 是{id:1,name:'c++'}
+export function addChannel (channel) {
+  return new Promise(function (resolve, reject) {
+    const key = store.state.user.token ? CACHE_CHANNEL_V : CACHE_CHANNEL_T // key根据当前的登录状态来判断
+    const channels = JSON.parse(localStorage.getItem(key)) // 拿到key 对应的本地数据
+    channels.push(channel) // 添加到频道数据
+    localStorage.setItem(key, JSON.stringify(channels)) // 从新存入本地
+    resolve() // 相当于promise的方法执行成功
+  })
+}

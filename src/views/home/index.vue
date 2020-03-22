@@ -1,25 +1,25 @@
 <template>
- <div class="container">
-   <!-- 标签页组件 -->
-   <!-- v-model绑定默认的激活页签 -->
-   <van-tabs v-model="activeIndex">
-     <!-- 子标签 -->
-       <van-tab :title="item.name" v-for="item in channels" :key="item.id">
-         <!-- 放置封装的组件 -->
-          <!--@showAction 监听子组件触发的点击事件 -->
-        <ArticleList :channel_id="item.id"  @showAction="openAction"></ArticleList>
-       </van-tab>
-   </van-tabs>
+  <div class="container">
+    <!-- 标签页组件 -->
+    <!-- v-model绑定默认的激活页签 -->
+    <van-tabs v-model="activeIndex">
+      <!-- 子标签 -->
+      <van-tab :title="item.name" v-for="item in channels" :key="item.id">
+        <!-- 放置封装的组件 -->
+        <!--@showAction 监听子组件触发的点击事件 -->
+        <ArticleList :channel_id="item.id" @showAction="openAction"></ArticleList>
+      </van-tab>
+    </van-tabs>
     <!-- 放置展开图标用来编辑频道 -->
-      <span class="bar_btn" @click="showChannelEdit=true">
-         <van-icon name="wap-nav"></van-icon>
-      </span>
-      <!-- 点击X号显示的弹层组件 -->
-      <van-popup :style="{ width: '80%' }" v-model="showMoreAction">
-        <!-- 监听子组件的自定义事件 -->
-        <!-- 子组件传的事件  不敢兴趣dislike 举报reports-->
-        <!-- @事件名="方法名($event 参数)" -->
-        <!-- $event 是事件参数 在H5标签中dom元素的事件参数 自定义事件中$event就是自定义事件传出的第一个参数 -->
+    <span class="bar_btn" @click="showChannelEdit=true">
+      <van-icon name="wap-nav"></van-icon>
+    </span>
+    <!-- 点击X号显示的弹层组件 -->
+    <van-popup :style="{ width: '80%' }" v-model="showMoreAction">
+      <!-- 监听子组件的自定义事件 -->
+      <!-- 子组件传的事件  不敢兴趣dislike 举报reports-->
+      <!-- @事件名="方法名($event 参数)" -->
+      <!-- $event 是事件参数 在H5标签中dom元素的事件参数 自定义事件中$event就是自定义事件传出的第一个参数 -->
       <MoreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('report',$event)" />
     </van-popup>
 
@@ -30,18 +30,24 @@
       <!-- 监听子组件的自定义事件  selectChannels-->
       <!-- 将激活的索引传到子组件进行添加样式 activeIndex-->
       <!-- 删除频道delChannels -->
-      <Channeledit :activeIndex="activeIndex" :channels="channels" @selectChannels="selectChannels" @delChannel="delChannel"></Channeledit>
+      <!-- 加频道addChannel -->
+      <Channeledit
+        @addChannel="addChannel"
+        :activeIndex="activeIndex"
+        :channels="channels"
+        @selectChannels="selectChannels"
+        @delChannel="delChannel"
+      ></Channeledit>
     </van-action-sheet>
- </div>
+  </div>
 </template>
 
 <script>
 import ArticleList from './components/article.list' // 文章列表子组件
 import MoreAction from './components/more-action' // 弹层组件
 import Channeledit from './components/channel-edit' // 频道管理的子组件
-import { getMyChannels, delChannel } from '@/api/channels'// 请求文章频道
+import { addChannel, getMyChannels, delChannel } from '@/api/channels' // 请求文章频道
 import { disLikeArticle, reportArticle } from '@/api/articles' // 不感兴趣的请求方法和举报
-
 import eventbus from '@/utils/eventbus' // 公共事件广播
 export default {
   components: {
@@ -57,10 +63,14 @@ export default {
       articleID: null, // 存储子组件传入的文章id
       activeIndex: 0, // 默认激活的页签为0
       showChannelEdit: false // 显示与隐藏频道管理 false为隐藏
-
     }
   },
   methods: {
+    // 添加频道
+    async addChannel (channel) {
+      await addChannel(channel)
+      this.channels.push(channel)
+    },
     // 删除频道的方法 参数id要删除的id
     // 删除频道的方法
     async delChannel (id) {
@@ -105,9 +115,11 @@ export default {
     // operateType就是操作类型 dislike就是不感兴趣 reports就是举报
     async dislikeOrReport (operateType, type) {
       try {
-        operateType === 'dislike' ? await disLikeArticle({
-          target: this.articleID // 传入不感兴趣的文章ID
-        }) : await reportArticle({ target: this.articleID, type })
+        operateType === 'dislike'
+          ? await disLikeArticle({
+            target: this.articleID // 传入不感兴趣的文章ID
+          })
+          : await reportArticle({ target: this.articleID, type })
         this.$lnotify({
           type: 'success',
           message: '操作成功'
@@ -116,7 +128,11 @@ export default {
         // 广播事件 传入要删除的文章id
         // 参出文章id 和当前页签下标
         // this.channels[this.activeIndex].id 这个就是页签下标的对应的名
-        eventbus.$emit('delArticle', this.articleID, this.channels[this.activeIndex].id)
+        eventbus.$emit(
+          'delArticle',
+          this.articleID,
+          this.channels[this.activeIndex].id
+        )
       } catch (error) {
         this.$lnotify({
           message: '操作失败'
@@ -142,12 +158,10 @@ export default {
     //     })
     //   }
     // }
-
   },
   created () {
-    this.getMyChannels()// 调用获取文章的方法
+    this.getMyChannels() // 调用获取文章的方法
   }
-
 }
 </script>
 
@@ -180,13 +194,13 @@ export default {
       height: 2px;
     }
   }
-  /deep/ .van-tabs__content{
+  /deep/ .van-tabs__content {
     flex: 1;
     overflow: hidden;
   }
-  /deep/ .van-tab__pane{
+  /deep/ .van-tab__pane {
     height: 100%;
-    .scroll-wrapper{
+    .scroll-wrapper {
       height: 100%;
       overflow-y: auto;
     }
@@ -199,7 +213,7 @@ export default {
   top: 0;
   right: 0;
   &::before {
-    content: "";
+    content: '';
     width: 100%;
     height: 100%;
     position: absolute;
