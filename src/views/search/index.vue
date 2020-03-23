@@ -4,10 +4,12 @@
     <van-nav-bar title="搜索中心" left-text="返回" left-arrow @click-left="$router.back()"></van-nav-bar>
     <!-- 搜索组件 -->
     <!-- 搜索关键字绑定 v-model -->
-    <van-search v-model.trim="q" placeholder="请输入搜索关键词" shape="round" />
+    <!-- 监听搜索事件search -->
+    <van-search  @search="onSearch" v-model.trim="q" placeholder="请输入搜索关键词" shape="round" />
     <van-cell-group class="suggest-box" v-if="q">
-      <van-cell icon="search">
-        <span>j</span>ava
+      <!-- 点击搜索联想跳转到结果页 -->
+      <van-cell @click="toResult(item)" icon="search" v-for="(item,index) in suggestion" :key="index">
+        {{item}}
       </van-cell>
     </van-cell-group>
     <!-- 历史记录 -->
@@ -34,16 +36,61 @@
 </template>
 
 <script>
-const key = 'toutiao-history' // 用来本地存储的历史记录key
+// 用来本地存储的历史记录key
+import { getSuggestion } from '@/api/articles'
+const key = 'toutiao-history'
 export default {
   data () {
     return {
       q: '', // 关键字查询
       // 定义历史记录 用key去本地存储中取数据 要是没有数据就给个空数组
-      historyList: JSON.parse(localStorage.getItem(key)) || []
+      historyList: JSON.parse(localStorage.getItem(key)) || [],
+      suggestion: [] // 联想搜索数组
     }
   },
+  watch: {
+    // 监视data中的q 防抖写法
+    // q () {
+    //   clearTimeout(this.timer) // 清除定时器
+    //   this.timer = setTimeout(async () => {
+    //     // q里没值得时候不去发请求
+    //     if (!this.q) {
+    //       // 将联想数组赋值[]
+    //       this.suggestion = []
+    //       return
+    //     }
+    //     // 请求联想建议
+    //     const data = await getSuggestion({ q: this.q })
+    //     this.suggestion = data.options
+    //   }, 300)
+    // }
+
+    // 节流写法
+    q () {
+      if (!this.timer) {
+        this.timer = setTimeout(async () => {
+          this.timer = null
+          if (!this.q) {
+          // 将联想数组赋值[]
+            this.suggestion = []
+            return
+          }
+          // 请求联想建议
+          const data = await getSuggestion({ q: this.q })
+          this.suggestion = data.options
+        }, 500)
+      }
+    }
+
+  },
   methods: {
+    // 点击联想搜索结果跳到结果页
+    toResult (text) {
+      this.historyList.push(text) // 搜索结果存入本地
+      this.historyList = Array.from(new Set(this.historyList)) // 去重复
+      localStorage.setItem(key, JSON.stringify(this.historyList)) // 历史记录从新设置到本地
+      this.$router.push({ path: '/search/result', query: { text } }) // 带着参数跳到结果页
+    },
     // 删除历史记录的方法
     delhistory (index) {
       this.historyList.splice(index, 1) // 用传入的下标在历史数组中找到删除
@@ -70,6 +117,16 @@ export default {
       } catch (error) {
 
       }
+    },
+    // 回车搜索
+    onSearch () {
+      // 在回车跳转前要将搜索内容存入本地
+      if (!this.q) return
+      this.historyList.push(this.q)// 将搜索记录加入数组
+      // set 可以数组去重返回伪数组 需要转化为数组 再赋值给historyList
+      this.historyList = Array.from(new Set(this.historyList)) // 去重复
+      localStorage.setItem(key, JSON.stringify(this.historyList)) // 设置到本地缓存
+      this.$router.push({ path: '/search/result', query: { q: this.q } })
     }
   }
 }

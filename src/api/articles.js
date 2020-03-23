@@ -30,3 +30,10 @@ export function reportArticle (data) {
     data
   })
 }
+// 获取搜索建议
+export function getSuggestion (params) {
+  return request({
+    url: '/suggestion', // 获取搜索建议
+    params // query参数放置在 params中
+  })
+}
