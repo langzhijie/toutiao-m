@@ -24,7 +24,7 @@
       <van-cell-group>
         <!-- 将历史记录进行循环 -->
         <!-- 动态点击事件 跳转到搜索结果 -->
-        <van-cell v-for="(item,index) in historyList" :key="index" @click="toSearchResult(item)">
+        <van-cell v-for="(item,index) in historyList" :key="index" @click="toResult(item)">
           <!-- 每项历史进行渲染 -->
           <a class="word_btn">{{item}}</a>
           <!-- 点击删除X号进行删除 需要将点击的下标进行传入               stop阻止事件冒泡          -->
@@ -85,11 +85,11 @@ export default {
   },
   methods: {
     // 点击联想搜索结果跳到结果页
-    toResult (text) {
-      this.historyList.push(text) // 搜索结果存入本地
+    toResult (q) {
+      this.historyList.push(q) // 搜索结果存入本地
       this.historyList = Array.from(new Set(this.historyList)) // 去重复
       localStorage.setItem(key, JSON.stringify(this.historyList)) // 历史记录从新设置到本地
-      this.$router.push({ path: '/search/result', query: { text } }) // 带着参数跳到结果页
+      this.$router.push({ path: '/search/result', query: { q } }) // 带着参数跳到结果页
     },
     // 删除历史记录的方法
     delhistory (index) {
@@ -98,11 +98,11 @@ export default {
       localStorage.setItem(key, JSON.stringify(this.historyList)) // 将删除的数据从新存入本地中去
     },
     // 跳转到搜索结果页
-    toSearchResult (text) {
-      // 跳转到搜索结果
-      // this.$router.push('/search/result?q=' + text)
-      this.$router.push({ path: '/search/result', query: { text } }) // 对象形式的传参
-    },
+    // toSearchResult (text) {
+    //   // 跳转到搜索结果
+    //   // this.$router.push('/search/result?q=' + text)
+    //   this.$router.push({ path: '/search/result', query: { text } }) // 对象形式的传参
+    // },
     // 点击全部删除历史记录
     async delAllhistory () {
       try {

@@ -37,3 +37,11 @@ export function getSuggestion (params) {
     params // query参数放置在 params中
   })
 }
+// 获取搜索建议点击请求数据
+
+export function getsearch (params) {
+  return request({
+    url: '/search',
+    params // 关键词 及分页信息
+  })
+}
