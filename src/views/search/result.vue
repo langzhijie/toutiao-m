@@ -7,7 +7,8 @@
  <!-- offset距离底部距离 -->
     <van-list v-model="upLoading" @load="onload" :finished="finished">
       <van-cell-group>
-        <van-cell v-for="item in articles" :key="item.art_id.toString()">
+        <!-- 点击搜索结果页中的每一项跳到文章详情页 -->
+        <van-cell  :to="`/article?artId=${item.art_id.toString()}`"   v-for="item in articles" :key="item.art_id.toString()">
           <div class="article_item">
             <h3 class="van-ellipsis">{{item.title}}</h3>
             <div class="img_box" v-if="item.cover.type===3">

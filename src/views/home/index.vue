@@ -165,8 +165,8 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
-// 这是频道管理弹出面板的样式
+<style lang='less' scoped>
+// 处理弹出编辑面板的样式
 .van-action-sheet {
   max-height: 100%;
   height: 100%;
@@ -178,7 +178,6 @@ export default {
     }
   }
 }
-
 .van-tabs {
   height: 100%;
   display: flex;
@@ -194,13 +193,13 @@ export default {
       height: 2px;
     }
   }
-  /deep/ .van-tabs__content {
+  /deep/ .van-tabs__content{
     flex: 1;
     overflow: hidden;
   }
-  /deep/ .van-tab__pane {
+  /deep/ .van-tab__pane{
     height: 100%;
-    .scroll-wrapper {
+    .scroll-wrapper{
       height: 100%;
       overflow-y: auto;
     }
@@ -213,7 +212,7 @@ export default {
   top: 0;
   right: 0;
   &::before {
-    content: '';
+    content: "";
     width: 100%;
     height: 100%;
     position: absolute;

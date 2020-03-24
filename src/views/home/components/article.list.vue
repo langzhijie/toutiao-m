@@ -25,7 +25,11 @@
         <van-cell-group>
           <!-- 列表的单元格 -->
           <!-- item.art_id 是个大数字的类型 key要用字符串或数字代替 -->
-          <van-cell v-for="item in articles " :key="item.art_id.toString()">
+          <van-cell
+            :to="`/article?artId=${item.art_id.toString()}`"
+            v-for="item in articles "
+            :key="item.art_id.toString()"
+          >
             <!-- 文章列表的循环项 -->
             <!-- 三图的 -->
             <div class="article_item">
@@ -35,29 +39,30 @@
               <!-- 三图 -->
               <div class="img_box" v-if="item.cover.type===3">
                 <!-- lazy-load 表示图片懒加载处理 -->
-                <van-image lazy-load  class="w33" fit="cover" :src="item.cover.images[0]" />
-                <van-image lazy-load  class="w33" fit="cover" :src="item.cover.images[1]" />
-                <van-image lazy-load  class="w33" fit="cover" :src="item.cover.images[2]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[0]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[1]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[2]" />
               </div>
               <!-- 单图 -->
               <div class="img_box" v-if="item.cover.type===1">
-
-                <van-image lazy-load  class="w33" fit="cover" :src="item.cover.images[0]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[0]" />
               </div>
               <!-- 作者信息 -->
               <div class="info_box">
-                <span>{{item.aut_name}}</span>
-                <span>{{item.comm_count}}</span>
-                <span>{{item.pubdate|relTime}}</span>
-                <!-- 这个X号显示需要判断登录状态 登录就显示 -->
+                <span>{{ item.aut_name }}</span>
+                <span>{{ item.comm_count }}评论</span>
+                <!-- 使用过滤器 -->
+                <span>{{ item.pubdate | relTime }}</span>
+                <!-- 此叉号的显示 应该根据当前的登录状态来判断 如果登录了 可以显示 如果没有登录 不显示 -->
+                <!-- 最原始方式 -->
                 <!-- <span class="close" v-if="$store.state.user.token"> -->
-                  <!--  @click="逻辑处理 点击事件名" 还需要传出点击的文章id做不感兴趣等操作-->
-                  <span @click="$emit('showAction',item.art_id.toString())"  class="close" v-if="user.token" >
+               <!-- 辅助函数的形式 -->
+               <!-- @事件名="逻辑处理"  点击事件中触发一个 显示反馈的事件 传出 点击的文章id-->
+               <span @click.stop="$emit('showAction', item.art_id.toString())" class="close" v-if="user.token">
                   <van-icon name="cross"></van-icon>
                 </span>
               </div>
             </div>
-
           </van-cell>
         </van-cell-group>
       </van-list>
@@ -78,7 +83,9 @@ export default {
     eventbus.$on('delArticle', (artID, channelId) => {
       // 判断 传来的频道等于自身的频道 如果等于就可以进行删除
       if (channelId === this.channel_id) {
-        const index = this.articles.findIndex(item => item.art_id.toString() === artID)
+        const index = this.articles.findIndex(
+          item => item.art_id.toString() === artID
+        )
         if (index > -1) {
           // 删除对应下标的数据
           this.articles.splice(index, 1)
@@ -111,11 +118,9 @@ export default {
       articles: [], // 文章列表
       downloading: false, // 下拉刷新是否开启 开启布尔值就是false
       timestamp: null // 用来存储历史事件戳
-
     }
   },
   methods: {
-
     // 上拉加载
     async onload () {
       // 如果加载完毕 就要把finished 设置为true 不再请求添加数据
@@ -189,11 +194,10 @@ export default {
       }
     }
   }
-
 }
 </script>
 
-<style lang="less">
+<style lang='less' scoped>
 .article_item {
   h3 {
     font-weight: normal;
