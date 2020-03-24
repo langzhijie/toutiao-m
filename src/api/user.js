@@ -12,3 +12,21 @@ export function login (data) {
   })
 //   返回一个promise对象
 }
+
+// 关注用户的方法
+export function followUser (data) {
+  return request({
+    url: '/user/followings', // 关注用户的请求地址
+    method: 'POST',
+    data
+  })
+}
+
+// 取消关注用户的方法
+export function unfollowUser (autid) {
+  return request({
+    url: `/user/followings/${autid}`, // 取消关注的请求
+    method: 'DELETE'
+
+  })
+}
