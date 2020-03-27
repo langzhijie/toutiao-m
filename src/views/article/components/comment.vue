@@ -39,13 +39,15 @@
     <!-- 输入框 -->
     <div class="reply-container van-hairline--top">
       <van-field v-model="value" placeholder="写评论...">
+        <!-- v-if="submiting" 点击了提交隐藏提交按钮 防止重复提交 -->
         <van-loading v-if="submiting" slot="button" type="spinner" size="16px"></van-loading>
-        <span class="submit" v-else slot="button">提交</span>
+        <span class="submit" v-else slot="button" @click="submit">提交</span>
       </van-field>
     </div>
     <!-- 放置评论的评论页面结构 -->
         <!-- 回复 -->
-    <van-action-sheet v-model="showReply" :round="false" class="reply_dialog" title="回复评论">
+        <!-- 关闭面板时@closed清空记录的评论id -->
+    <van-action-sheet @close="reply.commentId=null"  v-model="showReply" :round="false" class="reply_dialog" title="回复评论">
       <!-- 关闭自动执行load事件  immediate-check-->
       <van-list  :immediate-check="false" v-model="reply.loading" :finished="reply.finished" finished-text="没有更多了">
         <div class="item van-hairline--bottom van-hairline--top" v-for="item in this.reply.list" :key="item.com_id.toString()">
@@ -64,7 +66,8 @@
 </template>
 
 <script>
-import { getComments } from '@/api/articles' // 获取评论
+import { getComments, commentOrReply } from '@/api/articles' // 获取评论 提交评论
+
 export default {
   data () {
     return {
@@ -94,6 +97,57 @@ export default {
     }
   },
   methods: {
+    // 提交评论
+    async submit () {
+      // 点击提交时  要判断用户是否登录 如果没有登录就禁止评论 登录后才能评论
+      if (this.$store.state.user.token) {
+        // 有token才能进行评论 判断是否输入评论内容 没有输入直接返回
+        if (!this.value) return false // 没有内容直接返回
+        // 如果有内容
+        this.submiting = true // 先把状态打开 表示提交中 避免重复的提交 提交完毕后关闭状态
+        // 调用提交方法
+        // 休眠函数控制执行速度
+        await this.$sleep(500)
+        try {
+          const data = await commentOrReply({
+          // 要是有评论id就是评论id false就是文章id
+            target: this.reply.commentId ? this.reply.commentId : this.$route.query.artId, // 要么是文章id 就是评论的id
+            content: this.value, // 评论内容
+            art_id: this.reply.commentId ? this.$route.query.artId : null// 文章id 如果是对评论回复就要传此参数 对文章评论不需要传
+          })
+          // data.new_obj 此obj数据就是添加成功的一条数据 添加到评论列表
+          // 清空输入框 并且直接添加到评论列表里
+          if (this.reply.commentId) {
+            // 如果commentId存在就是评论的回复 需要添加到评论回复数组中
+            this.reply.list.unshift(data.new_obj)
+            // 评论回复 需要找到对应id 将评论id的回复数+1
+            // 寻找文章评论中 等于评论id的id
+            const comment = this.comments.find(item => item.com_id.toString() === this.reply.commentId)
+            comment && comment.reply_count++ // 如果找到了就将回复数+1
+          } else {
+            // 如果不是就是添加到文章频论
+            this.comments.unshift(data.new_obj) // 加到频论头部
+          }
+          this.value = '' // 清空输入框
+        } catch (error) {
+          this.$lnotify({ message: '评论失败' })
+        }
+
+        // 关闭状态 请求后
+        this.submiting = false
+      } else {
+        try {
+          // 没有登录的用户
+          await this.$dialog.confirm({
+            message: '请先登录'
+          })
+          // 跳转到登录页     用户登录成功后回到当前页面
+          this.$router.push({ path: 'login', query: { redirectUrl: this.$route.fullPath } }) // 需要跳回的页面
+        } catch (error) {
+          // 点击取消后
+        }
+      }
+    },
     // 打开回复面板
     async  openReply (commentId) {
       this.showReply = true // 打开面板
