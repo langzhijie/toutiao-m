@@ -29,7 +29,9 @@
             <!-- 时间 -->
             <span class="time">{{item.pubdate | relTime}}</span>&nbsp;
             <!-- 回复数量 -->
-            <van-tag plain @click="showReply=true">{{item.reply_count}} 回复</van-tag>
+            <!-- 点击回复弹出回复面板 -->
+            <!-- 记录评论id -->
+            <van-tag plain @click="openReply(item.com_id.toString())">{{item.reply_count}} 回复</van-tag>
           </p>
         </div>
       </div>
@@ -41,6 +43,21 @@
         <span class="submit" v-else slot="button">提交</span>
       </van-field>
     </div>
+    <!-- 放置评论的评论页面结构 -->
+        <!-- 回复 -->
+    <van-action-sheet v-model="showReply" :round="false" class="reply_dialog" title="回复评论">
+      <!-- 关闭自动执行load事件  immediate-check-->
+      <van-list  :immediate-check="false" v-model="reply.loading" :finished="reply.finished" finished-text="没有更多了">
+        <div class="item van-hairline--bottom van-hairline--top" v-for="item in this.reply.list" :key="item.com_id.toString()">
+          <van-image round width="1rem" height="1rem" fit="fill" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+          <div class="info">
+            <p><span class="name">{{  item.aut_name }}</span></p>
+            <p>{{item.content }}</p>
+            <p><span class="time">{{ item.pubdate | relTime }}</span></p>
+          </div>
+        </div>
+      </van-list>
+    </van-action-sheet>
   </div>
 
   <!-- 都不输入框 -->
@@ -62,10 +79,52 @@ export default {
       // 评论列表的数组
       comments: [],
       // offset是偏移量 分页依据 第一页数据null 第二页数据offset第一页最后一个id
-      offset: null
+      offset: null,
+      // 回复面板的显示与隐藏
+      showReply: false,
+      // 专门放置面板加载信息
+      reply: {
+        loading: false, // 评论的回复
+        finished: false, // 评论的回复是否加载完毕
+        offet: null, // 评论回复的偏移量
+        list: [], // 评论回复的数组
+        commentId: null // 评论id 查询评论回复使用
+      }
+
     }
   },
   methods: {
+    // 打开回复面板
+    async  openReply (commentId) {
+      this.showReply = true // 打开面板
+      this.reply.commentId = commentId // 记录评论id
+      // 清空之前的数据
+      this.reply.list = []
+      this.reply.offset = null // 点击面板的时候是新的数据 从第一数据
+      this.reply.finished = false //
+      this.reply.loading = true // 主动打开加载状态
+      await this.getReply() // 获取评论
+    },
+    // 获取评论回复
+    async getReply () {
+      const data = await getComments({
+        type: 'c', // 表示是评论的评论
+        source: this.reply.commentId, // 获取谁的评论的评论
+        offset: this.reply.offset // 评论的评论的分页依据
+
+      })
+      this.reply.list.push(...data.results) // 追加到评论回复的列表
+      // 关闭加载状态
+      this.reply.loading = false
+      // 判断判断第一页最后一个id和第一个id是否相等 要是true就加载完毕
+      this.reply.finished = data.last_id === data.end_id
+
+      // 如果还有数据
+      if (!this.reply.finished) {
+        // data.results.last_id 当前页的最后第一个id
+        this.reply.offset = data.last_id // 将求回的数据第一个id赋值给偏移量
+      }
+    },
     // 当滚动条距离底部一定限制是时触发
     async onload () {
       const { artId } = this.$route.query
@@ -136,6 +195,25 @@ export default {
   .submit {
     font-size: 12px;
     color: #3296fa;
+  }
+}
+.reply_dialog {
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  .van-action-sheet__header {
+    background: #3296fa;
+    color: #fff;
+    .van-icon-close {
+      color: #fff;
+    }
+  }
+  .van-action-sheet__content{
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 10px 44px;
   }
 }
 </style>
