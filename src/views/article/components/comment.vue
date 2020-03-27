@@ -2,28 +2,34 @@
 <!-- 此文件是评论区域的组件 -->
   <div class="comment">
       <!-- 列表组件 -->
-    <van-list v-model="loading" :finished="finished" finished-text="没有更多了">
+    <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onload">
         <!-- 评论列表 -->
-      <div class="item van-hairline--bottom van-hairline--top" v-for="index in 5" :key="index">
+      <div class="item van-hairline--bottom van-hairline--top" v-for="item in comments" :key="item.com_id.toString()">
+       <!-- 用户头像 -->
         <van-image
           round
           width="1rem"
           height="1rem"
           fit="fill"
-          src="https://img.yzcdn.cn/vant/cat.jpeg"
+          :src="item.aut_photo"
         />
         <div class="info">
           <p>
-            <span class="name">一阵清风</span>
+            <!-- 用户名称 -->
+            <span class="name">{{item.aut_name}}</span>
             <span style="float:right">
               <span class="van-icon van-icon-good-job-o zan"></span>
-              <span class="count">10</span>
+              <!-- 点赞数量 -->
+              <span class="count">{{item.like_count}}</span>
             </span>
           </p>
-          <p>评论的内容，。。。。</p>
+          <!-- 评论内容 -->
+          <p>{{item.content}}</p>
           <p>
-            <span class="time">两天内</span>&nbsp;
-            <van-tag plain @click="showReply=true">4 回复</van-tag>
+            <!-- 时间 -->
+            <span class="time">{{item.pubdate | relTime}}</span>&nbsp;
+            <!-- 回复数量 -->
+            <van-tag plain @click="showReply=true">{{item.reply_count}} 回复</van-tag>
           </p>
         </div>
       </div>
@@ -41,6 +47,7 @@
 </template>
 
 <script>
+import { getComments } from '@/api/articles' // 获取评论
 export default {
   data () {
     return {
@@ -51,7 +58,34 @@ export default {
       // 输入的内容
       value: '',
       // 控制提交中状态数据
-      submiting: false
+      submiting: false,
+      // 评论列表的数组
+      comments: [],
+      // offset是偏移量 分页依据 第一页数据null 第二页数据offset第一页最后一个id
+      offset: null
+    }
+  },
+  methods: {
+    // 当滚动条距离底部一定限制是时触发
+    async onload () {
+      const { artId } = this.$route.query
+      const data = await getComments({
+        type: 'a', // a表示当前文章的评论 c表示评论的回复
+        source: artId, // 查询谁的评论
+        offset: this.offset // 偏移量就赋值data中定义的
+
+      })
+      this.comments.push(...data.results) // 追加到评论数组
+      // 关闭加载状态
+      this.loading = false // 关闭上拉加载的状态
+      // 判断是否还有下一页数据
+      // 判断第一页最后一个id和第一个id是否相等 要是true就加载完毕
+      this.finished = data.end_id === data.last_id
+      // 如果不还有数据
+      if (!this.finished) {
+        // data.results.last_id 当前页的最后第一个id
+        this.offset = data.last_id // 将求回的数据第一个id赋值给偏移量
+      }
     }
   }
 }
