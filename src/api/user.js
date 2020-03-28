@@ -30,3 +30,13 @@ export function unfollowUser (autid) {
 
   })
 }
+
+/**
+ * 获取用户自己的信息
+ *
+ */
+export function getUserInfo (params) {
+  return request({
+    url: '/user' // 获取用户信息的地址
+  })
+}
