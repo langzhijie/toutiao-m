@@ -7,6 +7,7 @@
   left-arrow
   right-text="保存"
   @click-left="$router.back()"
+  @click-right="saveUserInfo"
 
 ></van-nav-bar>
   <van-cell-group>
@@ -74,7 +75,7 @@
 
 <script>
 import dayjs from 'dayjs' // 日期格式
-import { getUserProfile, updatePhoto } from '@/api/user' // 获取用户个人信息
+import { getUserProfile, updatePhoto, saveUserInfo } from '@/api/user' // 获取用户个人信息 上传头像 修改信息
 export default {
   data () {
     return {
@@ -139,6 +140,15 @@ export default {
       const res = await updatePhoto(data)
       this.user.photo = res.photo
       this.showPhoto = false
+    },
+    //  保存修改信息
+    async saveUserInfo () {
+      try {
+        await saveUserInfo(this.user)
+        this.$lnotify({ type: 'success', message: '保存成功' })
+      } catch (error) {
+        this.$lnotify({ message: '保存失败' })
+      }
     }
   },
   created () {
