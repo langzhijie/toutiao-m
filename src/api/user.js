@@ -32,11 +32,30 @@ export function unfollowUser (autid) {
 }
 
 /**
- * 获取用户自己的信息
+ * 获取用户自己的信息 粉丝数等
  *
  */
 export function getUserInfo (params) {
   return request({
     url: '/user' // 获取用户信息的地址
+  })
+}
+
+/****
+ * 获取用户的个人资料
+ *
+ * ***/
+export function getUserProfile () {
+  return request({
+    url: '/user/profile'
+  })
+}
+
+// 修改头像
+export function updatePhoto (data) {
+  return request({
+    url: '/user/photo',
+    method: 'patch',
+    data // body参数
   })
 }
