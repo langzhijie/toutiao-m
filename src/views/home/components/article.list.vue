@@ -4,7 +4,7 @@
   <!-- 返回值div的目的是形成滚动条 -->
   <!-- 为了以后实现阅读记忆 -->
 
-  <div class="scroll-wrapper">
+  <div class="scroll-wrapper" @scroll="remember" ref="myScroll">
     <!-- 组件van-list可以帮助我们完成上拉加载 -->
     <!-- 初始化完成 就会检测自己距离底部的长度 超过限定就会执行load事件 自动把绑定的loading变成true -->
     <!-- 滚动条与底部距离小于 offset 时触发load事件 -->
@@ -97,6 +97,19 @@ export default {
         }
       }
     })
+    eventbus.$on('changeTab', (id) => {
+      // 传入的id就是当前激活的tab页签的频道id
+      // 要判断 当前的文章列表 接受的id 是否等于此id 如果相等表示该文章列表实例就是需要滚动的实例
+      if (id === this.channel_id) {
+        // this.$nextTick()// 异步渲染 等到上一次的执行结果渲染完成 保证上一次异步渲染完成
+        this.$nextTick(() => {
+          if (this.scrollTop && this.$refs.myScroll) {
+          // 当滚动执行不为0并且滚动元素存在的情况下
+            this.$refs.myScroll.scrollTop = this.scrollTop // 滚动到记录的位置
+          }
+        })
+      }
+    })
   },
   computed: {
     ...mapState(['user']) // 将user对象映射到计算属性中
@@ -117,10 +130,20 @@ export default {
       finished: false, // 表示是否已经完成全部数据加载
       articles: [], // 文章列表
       downloading: false, // 下拉刷新是否开启 开启布尔值就是false
-      timestamp: null // 用来存储历史事件戳
+      timestamp: null, // 用来存储历史事件戳
+      scrollTop: 0 // 定义滚动的位置
     }
   },
   methods: {
+    // 记录滚动事件
+    remember (event) {
+    //  函数防抖 降频记录最后一次滚动
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
+        // 记录滚到到哪个位置
+        this.scrollTop = event.target.scrollTop // 记录下滚动位置
+      }, 500)
+    },
     // 上拉加载
     async onload () {
       // 如果加载完毕 就要把finished 设置为true 不再请求添加数据
@@ -192,6 +215,14 @@ export default {
         // 没有的话
         this.successText = '当前已是最新'
       }
+    }
+
+  },
+  activated () {
+    // 再激活函数中判断滚动条是否发生了变化
+    if (this.$refs.myScroll && this.scrollTop) {
+      // 判断滚动条是否大于0
+      this.$refs.myScroll.scrollTop = this.scrollTop // 将记录的位置滚回去
     }
   }
 }

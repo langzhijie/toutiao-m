@@ -76,6 +76,7 @@
 <script>
 import dayjs from 'dayjs' // 日期格式
 import { getUserProfile, updatePhoto, saveUserInfo } from '@/api/user' // 获取用户个人信息 上传头像 修改信息
+import { mapMutations } from 'vuex'
 export default {
   data () {
     return {
@@ -98,6 +99,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['updataPhoto']), // 引入更新头像
     //   关闭姓名弹层
     closeName () {
       if (this.user.name.length < 1 || this.user.name.length > 7) {
@@ -139,6 +141,8 @@ export default {
       data.append('photo', this.$refs.myfile.files[0])
       const res = await updatePhoto(data)
       this.user.photo = res.photo
+      // 修改头像成功后将最新的头像设置给vuex
+      this.updataPhoto({ photo: res.photo }) // 将最新的图片设置给vuex数据
       this.showPhoto = false
     },
     //  保存修改信息

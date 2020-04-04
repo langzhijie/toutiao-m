@@ -58,7 +58,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['delUser']),
+    ...mapMutations(['delUser', 'updataPhoto']), // uodatePhoto更新用户头像
     // 退出登录
     async lgout () {
       try {
@@ -74,6 +74,7 @@ export default {
     // 获取用户个人资料
     async getUseerInfo () {
       this.UserInfo = await getUserInfo() // 调用获取用户个人信息的方法
+      this.updataPhoto({ photo: this.UserInfo.photo }) // 设置用户头像
     }
 
   },

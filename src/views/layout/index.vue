@@ -6,7 +6,12 @@
     <van-nav-bar v-if="showNavBar" fixed title="黑马头条" right-text="搜索" @click-right="$router.push('/search')"></van-nav-bar>
       <!-- :class="{ 名称: 布尔值 } -->
     <div class="my-wrapper" :class="{noTop:!showNavBar}">
-      <router-view></router-view>
+      <!-- 缓存二级路由容器 -->
+      <keep-alive>
+        <!-- 包裹后的路由容器中的组件就不会被销毁了 -->
+        <router-view></router-view>
+      </keep-alive>
+
     </div>
     <!-- 底部标签栏 -->
     <!-- route 开启路由 -->

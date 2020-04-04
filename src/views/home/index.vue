@@ -2,7 +2,7 @@
   <div class="container">
     <!-- 标签页组件 -->
     <!-- v-model绑定默认的激活页签 -->
-    <van-tabs v-model="activeIndex">
+    <van-tabs v-model="activeIndex" @change="changeTab">
       <!-- 子标签 -->
       <van-tab :title="item.name" v-for="item in channels" :key="item.id">
         <!-- 放置封装的组件 -->
@@ -66,6 +66,11 @@ export default {
     }
   },
   methods: {
+    changeTab () {
+      // 切换页签事件 广播哦一个消息让对应的页签的文章列表去滚动回位置
+      eventbus.$emit('changeTab', this.channels[this.activeIndex].id)
+      // 广播中传出一个参数 传当前谁激活了 传出当前激活索引的id
+    },
     // 添加频道
     async addChannel (channel) {
       await addChannel(channel)
