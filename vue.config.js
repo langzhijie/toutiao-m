@@ -14,5 +14,7 @@ module.exports = {
       }
     }
 
-  }
+  },
+  publicPath: './' // 打包后的引用地址
+
 }
