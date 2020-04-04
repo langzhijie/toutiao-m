@@ -22,7 +22,10 @@ const routes = [
       // 二级路由表
       {
         path: '/',
-        component: Home // 二级路由 首页
+        component: Home, // 二级路由 首页
+        // meta中可以放置当前路由的信息 根据此信息进行相关的判断
+        // 如果一级路由存在默认的二级路由那么meta属性应该写在二级路由的对象上
+        meta: { isAlive: true } // 路由元信息 isAlive表示是否进行缓存
       },
       {
         path: '/question',
